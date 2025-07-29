@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced DNS Resolver - Web Interface</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <h1>🌐 Advanced DNS Resolver</h1>
+                <p class="subtitle">Educational DNS Analysis Tool</p>
+            </div>
+            <div class="warning">
+                <span class="warning-icon">⚠️</span>
+                <span>AUTHORIZED TESTING ONLY - Educational Use</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="resolve">DNS Lookup</button>
+            <button class="nav-tab" data-tab="bulk">Bulk Analysis</button>
+            <button class="nav-tab" data-tab="reverse">Reverse DNS</button>
+            <button class="nav-tab" data-tab="test">Server Test</button>
+        </nav>
+
+        <!-- DNS Lookup Tab -->
+        <div id="resolve-tab" class="tab-content active">
+            <div class="panel">
+                <h2>🔍 DNS Record Lookup</h2>
+                
+                <form id="resolveForm">
+                    <div class="form-group">
+                        <label for="domain">Domain Name</label>
+                        <input type="text" id="domain" name="domain" placeholder="example.com" required>
+                        <small>Enter the domain name to analyze</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Record Types</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="A" checked>
+                                <span class="checkmark"></span>
+                                A (IPv4)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="AAAA" checked>
+                                <span class="checkmark"></span>
+                                AAAA (IPv6)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="CNAME" checked>
+                                <span class="checkmark"></span>
+                                CNAME
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="MX" checked>
+                                <span class="checkmark"></span>
+                                MX (Mail)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="NS" checked>
+                                <span class="checkmark"></span>
+                                NS (Name Server)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="TXT" checked>
+                                <span class="checkmark"></span>
+                                TXT
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="SOA">
+                                <span class="checkmark"></span>
+                                SOA
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="record_types" value="SRV">
+                                <span class="checkmark"></span>
+                                SRV
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="advanced-section">
+                        <h3>Advanced Options</h3>
+                        <div class="advanced-options">
+                            <div class="option-group">
+                                <label for="servers">DNS Servers (comma-separated)</label>
+                                <input type="text" id="servers" name="servers" placeholder="8.8.8.8, 1.1.1.1, 9.9.9.9">
+                            </div>
+                            <div class="option-group">
+                                <label for="timeout">Timeout (seconds)</label>
+                                <input type="number" id="timeout" name="timeout" min="1" max="30" value="5">
+                            </div>
+                            <div class="option-group">
+                                <label for="concurrent">Concurrent Queries</label>
+                                <input type="number" id="concurrent" name="concurrent" min="1" max="50" value="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        🚀 Analyze DNS
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Panel -->
+            <div id="resolveResults" class="panel results-panel hidden">
+                <h2>📊 DNS Analysis Results</h2>
+                <div class="results-header">
+                    <div class="results-info">
+                        <span class="info-item">Domain: <span id="resultDomain"></span></span>
+                        <span class="info-item">Records Found: <span id="recordCount"></span></span>
+                    </div>
+                    <div class="export-actions">
+                        <button class="btn-export" onclick="exportResults('json', 'resolve')">📄 JSON</button>
+                        <button class="btn-export" onclick="exportResults('csv', 'resolve')">📊 CSV</button>
+                    </div>
+                </div>
+                <div class="results-container" id="resolveResultsContainer"></div>
+            </div>
+        </div>
+
+        <!-- Bulk Analysis Tab -->
+        <div id="bulk-tab" class="tab-content">
+            <div class="panel">
+                <h2>📋 Bulk Domain Analysis</h2>
+                
+                <form id="bulkForm">
+                    <div class="form-group">
+                        <label for="domains">Domain Names</label>
+                        <textarea id="domains" name="domains" rows="5" placeholder="google.com&#10;facebook.com&#10;twitter.com" required></textarea>
+                        <small>Enter one domain per line (max 50 domains)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Record Types (for bulk analysis)</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bulk_record_types" value="A" checked>
+                                <span class="checkmark"></span>
+                                A (IPv4)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bulk_record_types" value="AAAA" checked>
+                                <span class="checkmark"></span>
+                                AAAA (IPv6)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bulk_record_types" value="MX" checked>
+                                <span class="checkmark"></span>
+                                MX (Mail)
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bulk_record_types" value="NS">
+                                <span class="checkmark"></span>
+                                NS
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" name="bulk_record_types" value="TXT">
+                                <span class="checkmark"></span>
+                                TXT
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        🔄 Analyze Domains
+                    </button>
+                </form>
+            </div>
+
+            <!-- Bulk Results Panel -->
+            <div id="bulkResults" class="panel results-panel hidden">
+                <h2>📈 Bulk Analysis Results</h2>
+                <div class="results-header">
+                    <div class="results-info">
+                        <span class="info-item">Domains Analyzed: <span id="bulkDomainCount"></span></span>
+                    </div>
+                    <div class="export-actions">
+                        <button class="btn-export" onclick="exportResults('json', 'bulk')">📄 JSON</button>
+                        <button class="btn-export" onclick="exportResults('csv', 'bulk')">📊 CSV</button>
+                    </div>
+                </div>
+                <div class="results-container" id="bulkResultsContainer"></div>
+            </div>
+        </div>
+
+        <!-- Reverse DNS Tab -->
+        <div id="reverse-tab" class="tab-content">
+            <div class="panel">
+                <h2>🔄 Reverse DNS Lookup</h2>
+                
+                <form id="reverseForm">
+                    <div class="form-group">
+                        <label for="ip">IP Address</label>
+                        <input type="text" id="ip" name="ip" placeholder="8.8.8.8 or 2001:4860:4860::8888" required>
+                        <small>Enter IPv4 or IPv6 address for reverse lookup</small>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        🔍 Reverse Lookup
+                    </button>
+                </form>
+            </div>
+
+            <!-- Reverse Results Panel -->
+            <div id="reverseResults" class="panel results-panel hidden">
+                <h2>📍 Reverse DNS Results</h2>
+                <div class="results-container" id="reverseResultsContainer"></div>
+            </div>
+        </div>
+
+        <!-- Server Test Tab -->
+        <div id="test-tab" class="tab-content">
+            <div class="panel">
+                <h2>⚡ DNS Server Performance Test</h2>
+                
+                <form id="testForm">
+                    <div class="form-group">
+                        <label for="testDomain">Test Domain</label>
+                        <input type="text" id="testDomain" name="test_domain" placeholder="google.com" value="google.com">
+                        <small>Domain to use for performance testing</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="iterations">Test Iterations</label>
+                        <input type="number" id="iterations" name="iterations" min="1" max="20" value="5">
+                        <small>Number of queries per DNS server</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="testServers">DNS Servers to Test</label>
+                        <input type="text" id="testServers" name="servers" placeholder="8.8.8.8, 1.1.1.1, 9.9.9.9" value="8.8.8.8, 1.1.1.1, 9.9.9.9">
+                        <small>Comma-separated list of DNS servers</small>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        🧪 Test Servers
+                    </button>
+                </form>
+            </div>
+
+            <!-- Test Results Panel -->
+            <div id="testResults" class="panel results-panel hidden">
+                <h2>📊 Server Performance Results</h2>
+                <div class="results-container" id="testResultsContainer"></div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>Analyzing DNS records...</p>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <span class="warning-icon">⚠️</span>
+                <strong>DISCLAIMER:</strong> 
+                This tool is for educational purposes and authorized testing only. 
+                Unauthorized DNS analysis may be illegal and unethical.
+            </p>
+            <p class="version">Advanced DNS Resolver v1.0.0 - Educational Security Tool</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
