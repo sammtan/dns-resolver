@@ -356,6 +356,60 @@ This tool demonstrates:
 - Use local DNS servers for better performance
 - Implement DNS caching for repeated queries
 
+## 🔗 Combined Workflow Integration
+
+### Real-World Security Analysis with Packet Sniffer
+
+The DNS Resolver works powerfully in combination with network monitoring tools like the Packet Sniffer for comprehensive security analysis:
+
+#### **Complete Infrastructure Assessment Example**
+
+```bash
+# Step 1: DNS Intelligence Gathering
+./dns-resolver resolve github.com --types A,AAAA,MX,NS,TXT --format json
+# Discovers: github.com → 20.205.243.166, api.github.com → 20.205.243.168
+
+# Step 2: Real-time Traffic Monitoring (with Packet Sniffer)
+# Monitor actual traffic to discovered IPs
+# Result: Traffic actually goes to 140.82.113.21 (load balancer)
+
+# Step 3: Reverse DNS Validation
+./dns-resolver reverse 140.82.113.21
+# Result: lb-140-82-113-21-iad.github.com (GitHub Washington DC)
+```
+
+#### **Intelligence Correlation Benefits**
+
+**DNS Discovery + Traffic Analysis**:
+- **DNS shows potential targets**: All possible IPs and infrastructure
+- **Packet monitoring shows reality**: Actual communication endpoints
+- **Reverse DNS validates**: Confirms infrastructure ownership
+
+**Real Example Results**:
+```bash
+DNS Resolution:    github.com → 20.205.243.166
+Actual Traffic:    192.168.1.5 ↔ 140.82.113.21 (12 packets, 100% HTTPS)
+Reverse Lookup:    140.82.113.21 → lb-140-82-113-21-iad.github.com
+Infrastructure:    GitHub load balancer in Washington DC datacenter
+```
+
+#### **Automated Integration Potential**
+
+```go
+// Pseudo-code for combined platform
+targets := dnsResolver.BulkResolve(domains)
+packetSniffer.MonitorIPs(targets.GetAllIPs())
+for packet := range packetSniffer.Packets() {
+    if !targets.Contains(packet.DestIP) {
+        // New IP discovered through traffic analysis
+        hostname := dnsResolver.Reverse(packet.DestIP)
+        targets.AddDiscovered(packet.DestIP, hostname)
+    }
+}
+```
+
+This integration provides **complete network intelligence** that neither tool could achieve independently.
+
 ## Contributing
 
 This is an educational project. When extending functionality:
